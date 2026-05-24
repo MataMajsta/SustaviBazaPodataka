@@ -1,10 +1,12 @@
 <script setup>
 import Event from '../components/Event.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
-const adrese = ["adresa1", "adresa2"];
-const galerije = ["Galerija1", "Galerija2"];
-const vrste = ["Izlozba", "Konferencija"];
+const Adrese = ref([]);
+const Galerije = ref([]);
+const VrsteEventa = ref([]);
+const Events = ref([]);
 
 const showCreate = ref(false);
 
@@ -15,13 +17,31 @@ const createNew = () => {
 const confirmCreate = () => {
     alert('Kreirano');
 }
+
+const postavljanje = async () => {
+    let adrese = await axios.get('http://localhost:5000/api/lokacije');
+    Adrese.value = adrese.data;
+    Adrese.value[Adrese.value.length] = {_id: "Nova", adresa: "Nova"};
+
+    let galerije = await axios.get('http://localhost:5000/api/galerije');
+    Galerije.value = galerije.data;
+
+    let vrsteEventa = await axios.get('http://localhost:5000/api/vrsteEventa');
+    VrsteEventa.value = vrsteEventa.data;
+
+    let events = await axios.get('http://localhost:5000/api/events');
+    Events.value = events.data;
+}
+
+onMounted(() => {
+    postavljanje();
+})
 </script>
 
 <template>
     <div id="podaci">
         <div>Podaci iz baze</div>
-        <Event id="5" naziv="Event1" cijena="15" info="Nesto" novaLokacija="ima" galerija="Galerija1" vrstaEventa="izlozba"/>
-        <Event id="6" naziv="Event1" cijena="15" info="Nista" galerija="Galerija2" vrstaEventa="izlozba"/>
+        <Event v-for="ev in Events" :id="ev._id" :naziv="ev.naziv" :cijena="ev.cijenaUlaza" :info="ev.info" :adresaId="ev.idNoveLokacije" :adrese="Adrese" :galerijaId="ev.idGalerije" :galerije="Galerije" :idVrsteEventa="ev.idVrsteEventa" :eventovi="VrsteEventa"/>
     </div>
 
     <button id="createNew" @click="createNew()">Create New</button>

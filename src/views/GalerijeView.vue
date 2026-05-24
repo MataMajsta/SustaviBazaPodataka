@@ -1,8 +1,10 @@
 <script setup>
 import Galerija from '../components/Galerija.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
-const adrese = ["adresa1", "adresa2"];
+const Adrese = ref([]);
+const Galerije = ref([]);
 
 const showCreate = ref(false);
 
@@ -13,13 +15,24 @@ const createNew = () => {
 const confirmCreate = () => {
     alert('Kreirano');
 }
+
+const testBack = async () => {
+    let adrese = await axios.get('http://localhost:5000/api/lokacije');
+    Adrese.value = adrese.data;
+    Adrese.value[Adrese.value.length] = {_id: "Nova", adresa: "Nova"};
+    let galerije = await axios.get('http://localhost:5000/api/galerije');
+    Galerije.value = galerije.data;
+}
+
+onMounted(() => {
+    testBack();
+})
 </script>
 
 <template>
     <div id="podaci">
         <div>Podaci iz baze</div>
-        <Galerija id="5" naziv="galerija1" cijena="15" info="Nesto" adresa="Ulica 21"/>
-        <Galerija id="6" naziv="galerija2" cijena="25" info="Nista"/>
+        <Galerija v-for="g in Galerije" :id="g._id" :naziv="g.naziv" :cijena="g.cijenaUlaza" :info="g.info" :adresaId="g.idLokacije" :adrese="Adrese"/>
     </div>
 
     <button id="createNew" @click="createNew()">Create New</button>
@@ -29,7 +42,7 @@ const confirmCreate = () => {
         <input type="text" placeholder="Naziv galerije"/>
         <input type="number" placeholder="Cijena ulaza"/>
         <select>
-            <option v-for="ad in adrese" :value="ad">{{ ad }}</option>
+            <option v-for="ad in Adrese" :value="ad.adresa">{{ ad.adresa }}</option>
         </select>
         <input type="text" placeholder="Dodatne informacije"/>
         <button @click="confirmCreate">Create</button>

@@ -1,9 +1,13 @@
 <script setup>
 import Djelo from '../components/Djelo.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
-const galerije = ["Galerija1", "Galerija2"];
-const autori = ["Autor1", "Autor2"];
+const Autori = ref([]);
+const Djela = ref([]);
+const AutorDjelo = ref([]);
+const VrsteDjela = ref([]);
+const Galerije = ref([]);
 
 const showCreate = ref(false);
 
@@ -14,13 +18,33 @@ const createNew = () => {
 const confirmCreate = () => {
     alert('Kreirano');
 }
+
+const postavljanje = async () => {
+    let autori = await axios.get('http://localhost:5000/api/autori');
+    Autori.value = autori.data;
+
+    let autorDjelo = await axios.get('http://localhost:5000/api/autorDjelo');
+    AutorDjelo.value = autorDjelo.data;
+
+    let galerije = await axios.get('http://localhost:5000/api/galerije');
+    Galerije.value = galerije.data;
+
+    let vrsteDjela = await axios.get('http://localhost:5000/api/vrsteDjela');
+    VrsteDjela.value = vrsteDjela.data;
+
+    let djela = await axios.get('http://localhost:5000/api/djela');
+    Djela.value = djela.data;
+}
+
+onMounted(() => {
+    postavljanje();
+})
 </script>
 
 <template>
     <div id="podaci">
         <div>Podaci iz baze</div>
-        <Djelo id="5" naziv="Slika1" galerija="Galerija1" info="Nesto" vrsta="Slika"/>
-        <Djelo id="6" naziv="Slika2" galerija="Galerija2" info="Nista" vrsta="Slika"/>
+        <Djelo v-for="d in Djela" :id="d._id" :naziv="d.naziv" :idGalerije="d.idGalerije" :status="d.status" :idVrsteDjela="d.idVrstaDjela" :vrsteDjela="VrsteDjela" :galerije="Galerije" :autori="Autori" :autorDjelo="AutorDjelo"/>
     </div>
 
     <button id="createNew" @click="createNew()">Create New</button>

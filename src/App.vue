@@ -4,9 +4,11 @@ import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <RouterLink to="/">Events </RouterLink>
-  <RouterLink to="/galerije">Galerije </RouterLink>
-  <RouterLink to="/djela">Djela </RouterLink>
+  <div id="header1">
+  <RouterLink to="/"><button>Events </button></RouterLink>
+  <RouterLink to="/galerije"><button>Galerije</button></RouterLink>
+  <RouterLink to="/djela"><button>Djela</button></RouterLink>
+  </div>
   <RouterView />
 </template>
 
@@ -21,5 +23,18 @@ button {
 }
 select {
   font-size: 20px;
+}
+#header1 {
+  display: flex;
+  flex-direction: row;
+  gap: 20px
+}
+option {
+  background: none;
+  color: grey;
+}
+select {
+  background: none;
+  color: grey;
 }
 </style>
