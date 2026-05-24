@@ -70,6 +70,14 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    text-shadow: 2px 5px 2px rgba(92, 22, 113, 0.5);
+}
+#createNew {
+    width: 30%;
 }
 #creation {
     font-size: 25px;
@@ -77,6 +85,10 @@ onMounted(() => {
     flex-direction: column;
     gap: 10px; 
     font-weight: bold;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
 }
 input {
     font-size: 25px;
