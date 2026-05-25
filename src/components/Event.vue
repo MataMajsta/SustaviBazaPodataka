@@ -1,28 +1,25 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref ,onMounted} from 'vue';
 import axios from 'axios';
-
-const selectedAdress = ref()
-
-const props = defineProps({
+defineProps({
   id: String,
   naziv: String,
-  cijena: Number,
+  cijena: String,
   info: String,
-  adresaId: String,
-  adrese: Array,
-  galerijaId: String,
-  galerije: Array,
-  idVrsteEventa: String,
-  eventovi: Array,
+  novaLokacija: String | undefined,
+  galerija: String,
+  vrstaEventa: String,
   variant: {
     type: String,
     default: 'default'
   }
 })
-
+const nazivref=ref(null);
+const inforef=ref(null);
+const cijenaref=ref(null);
 const editing = ref(false)
-
+const adrese = ref([]);
+const vrste = ref([]);
 const edit = (id) => {
     editing.value = true;
     let divs = document.getElementsByClassName(id);
@@ -31,37 +28,59 @@ const edit = (id) => {
         divs[i].style.backgroundColor = "yellow";
         divs[i].contentEditable = true;
     }
-    document.getElementById(props.id + 4).style.pointerEvents = "auto";
-    document.getElementById(props.id + 5).style.pointerEvents = "auto";
-    document.getElementById(props.id + 6).style.pointerEvents = "auto";
 }
-const izbrisi = async () => {
-    if(confirm("Jeste li sigurni da zelite izbrisati?")){
-        const response = await axios.delete('http://localhost:5000/api/events/' + props.id);
-        console.log(response);
+const izbrisi = (id) => {
+    alert('hi');
+}
+onMounted(() => {
+    console.log('Component mounted, fetching adrese...');
+    axios.get('http://localhost:3000/lokacije')
+        .then(response => {
+            adrese.value = response.data;
+            console.log('Adrese fetched successfully:', adrese.value);
+        })
+        .catch(error => {
+            console.error('Error fetching adrese:', error);
+        });
+    axios.get('http://localhost:3000/vrste/eventi')
+        .then(response => {
+            vrste.value = response.data;
+            console.log('Vrste fetched successfully:', vrste.value);
+        })
+        .catch(error => {
+            console.error('Error fetching vrste:', error);
+        });
+});
+async function izbrisiEvent(id) {   
+    try {
+        const response = await axios.delete(`http://localhost:3000/eventi/${id}`);
+        console.log('Event deleted successfully:', response.data);
+        location.reload();
+    } catch (error) {
+        console.error('Error deleting event:', error);
     }
+
 }
 
-const potvrdi = async () => {
-    if(confirm("Jeste li sigurni da ste dobro unijeli?")){
-        let novaAdresa = "nesto";
-        if(selectedAdress.value == 'Nova'){
-            const pom = await axios.post('http://localhost:5000/api/lokacije', {
-                mjesto: document.getElementById(props.id + 7).value,
-                drzava: document.getElementById(props.id + 8).value,
-                adresa: document.getElementById(props.id + 9).value,
-            });
-            novaAdresa = pom.data.id;
-        } else novaAdresa = selectedAdress.value;
-        const response = await axios.patch('http://localhost:5000/api/events/' + props.id, {
-            "naziv": document.getElementById(props.id + 1).innerHTML,
-            "cijenaUlaza": document.getElementById(props.id + 2).innerHTML,
-            "info": document.getElementById(props.id + 3).innerHTML,
-            "idNoveLokacije": novaAdresa,
-            "idGalerije": document.getElementById(props.id + 6).value,
-            "idVrsteEventa": document.getElementById(props.id + 5).value,
+const potvrdi = () => {
+    alert('Podatak azuriran!');
+}
+async function azurirajEvent(id,vrstaEventa,novaLokacija) {   
+    const noviNaziv = nazivref.value.innerText;
+    const novaCijena = cijenaref.value.innerText;
+    const noviInfo = inforef.value.innerText;
+    try {
+        const response = await axios.patch(`http://localhost:3000/eventi/${id}`, {
+            idevent: id,
+            naziv: noviNaziv,
+            info: noviInfo,
+            cijena: Number(novaCijena),
+            lokacijaid:adrese.value.find(ad => ad.mjesto === novaLokacija)?.idlokacija,
+            vrstaid:vrste.value.find(v => v.tip === vrstaEventa)?.idevent 
         });
-        console.log(response);
+        console.log('Event updated successfully:', response.data);
+    } catch (error) {
+        console.error('Error updating event:', error);
     }
 }
 
@@ -74,46 +93,22 @@ const ponisti = (id) => {
         divs[i].style.backgroundColor = "transparent";
         divs[i].contentEditable = true;
     }
-    document.getElementById(props.id + 4).style.pointerEvents = "none";
-    document.getElementById(props.id + 5).style.pointerEvents = "none";
-    document.getElementById(props.id + 6).style.pointerEvents = "none";
 }
-
-onMounted(() => {
-    selectedAdress.value = props.adresaId;
-    document.getElementById(props.id + 4).style.pointerEvents = "none";
-    
-    document.getElementById(props.id + 5).value = props.idVrsteEventa;
-    document.getElementById(props.id + 5).style.pointerEvents = "none";
-    
-    document.getElementById(props.id + 6).value = props.galerijaId;
-    document.getElementById(props.id + 6).style.pointerEvents = "none";
-})
 </script>
 
 <template>
     <div id="mainDiv">
-        <div class="lapo">
-            ID: <span>{{ id }}</span>
-            Naziv: <span :class="id" :id="id + 1">{{ naziv }}</span>
-            Cijena: <span :class="id" :id = "id + 2">{{ cijena }}</span>
-            Info: <span :id="id + 3" :class="id">{{ info }}</span>
-        </div>
-        <div class="lapo">
-            Galerija: <select :id="id + 6"><option v-for="g in galerije" :value="g._id">{{ g.naziv }}</option> </select>
-            Vrsta eventa: <select :id="id + 5"><option v-for="vr in eventovi" :value="vr._id">{{ vr.tip }}</option> </select>
-            Nova lokacija: <select v-model="selectedAdress" :id="id + 4"><option v-for="ad in adrese" :value="ad._id">{{ ad.adresa }}</option> </select>
-
-            <button v-if="!editing" @click="edit(id)">Uredi</button>
-            <button v-if="editing" @click="potvrdi()">Potvrdi</button>
-            <button v-if="editing" @click="ponisti(id)">Ponisti</button>
-            <button @click="izbrisi()">Izbrisi</button>
-        </div>
-        <div v-if="selectedAdress=='Nova'" class="lapo">
-            <input :id="id + 7" type="text" placeholder="mjesto"/>
-            <input :id="id + 8" type="text" placeholder="drzava"/>
-            <input :id="id + 9" type="text" placeholder="adresa"/>
-        </div>
+        ID: <span>{{ id }}</span>
+        Naziv: <span ref="nazivref" :class="id">{{ naziv }}</span>
+        Cijena ulaza: <span ref="cijenaref" :class="id">{{ cijena }}</span>
+        Info: <span ref="inforef" :class="id">{{ info }}</span>
+        Galerija: <span :class="id">{{ galerija }}</span>
+        Vrsta eventa: <span :class="id">{{ vrstaEventa }}</span>
+        <span v-if="novaLokacija">Adresa: <span :class="id">{{ novaLokacija }}</span></span>
+        <button v-if="!editing" @click="edit(id)">Uredi</button>
+        <button v-if="editing" @click="azurirajEvent(id,vrstaEventa,novaLokacija)">Potvrdi</button>
+        <button v-if="editing" @click="ponisti(id)">Ponisti</button>
+        <button @click="izbrisiEvent(id,vrstaEventa,novaLokacija)">Izbrisi</button>
     </div>
 </template>
 
@@ -121,12 +116,6 @@ onMounted(() => {
 #mainDiv {
     font-size: 30px;
     color: grey;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-    margin-top: 20px;
-}
-.lapo {
     display: flex;
     flex-direction: row;
     gap: 5px;

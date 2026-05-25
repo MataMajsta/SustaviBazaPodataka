@@ -1,13 +1,55 @@
 <script setup>
 import Event from '../components/Event.vue';
-import { ref, onMounted } from 'vue';
+import { ref ,onMounted} from 'vue';
 import axios from 'axios';
 
-const Adrese = ref([]);
-const Galerije = ref([]);
-const VrsteEventa = ref([]);
-const Events = ref([]);
-
+const adrese = ref([]);
+const galerije = ref([]);
+const vrste = ref([]);
+const eventa = ref([]);
+const newEvent = ref({
+    naziv: '',
+    cijena: 0,
+    info: '',
+    lokacijaid: null,
+    galerijaid: null,
+    vrstaid: null,
+});
+onMounted(() => {
+    console.log('Component mounted, fetching adrese...');
+    axios.get('http://localhost:3000/lokacije')
+        .then(response => {
+            adrese.value = response.data;
+            console.log('Adrese fetched successfully:', adrese.value);
+        })
+        .catch(error => {
+            console.error('Error fetching adrese:', error);
+        });
+    axios.get('http://localhost:3000/galerije')
+        .then(response => {
+            galerije.value = response.data;
+            console.log('Galerije fetched successfully:', galerije.value);
+        })
+        .catch(error => {
+            console.error('Error fetching galerije:', error);
+        });
+    axios.get('http://localhost:3000/vrste/eventi')
+        .then(response => {
+            vrste.value = response.data;
+            console.log('Vrste eventa fetched successfully:', vrste.value);
+        })
+        .catch(error => {
+            console.error('Error fetching vrste eventa:', error);
+        });
+    axios.get('http://localhost:3000/eventi')
+        .then(response => {
+            eventa.value = response.data;
+            console.log('Events fetched successfully:', response.data);
+        })
+        .catch(error => {
+            console.error('Error fetching events:', error);
+        });
+});
 const showCreate = ref(false);
 
 const createNew = () => {
@@ -17,51 +59,47 @@ const createNew = () => {
 const confirmCreate = () => {
     alert('Kreirano');
 }
-
-const postavljanje = async () => {
-    let adrese = await axios.get('http://localhost:5000/api/lokacije');
-    Adrese.value = adrese.data;
-    Adrese.value[Adrese.value.length] = {_id: "Nova", adresa: "Nova"};
-
-    let galerije = await axios.get('http://localhost:5000/api/galerije');
-    Galerije.value = galerije.data;
-
-    let vrsteEventa = await axios.get('http://localhost:5000/api/vrsteEventa');
-    VrsteEventa.value = vrsteEventa.data;
-
-    let events = await axios.get('http://localhost:5000/api/events');
-    Events.value = events.data;
-}
-
-onMounted(() => {
-    postavljanje();
-})
+async function createEvent() {   
+    console.log('Creating event with data:', newEvent.value);
+        try {
+            const response = await axios.post('http://localhost:3000/eventi', {
+                idevent: 69,
+                naziv: newEvent.value.naziv,
+                cijena: newEvent.value.cijena,
+                info: newEvent.value.info,
+                lokacijaid: newEvent.value.lokacijaid,
+                vrstaid: newEvent.value.vrstaid,
+            });
+            console.log('Event created successfully:', response.data);
+        } catch (error) {
+            console.error('Error creating event:', error);
+        }
+    }
 </script>
 
 <template>
     <div id="podaci">
         <div>Podaci iz baze</div>
-        <Event v-for="ev in Events" :id="ev._id" :naziv="ev.naziv" :cijena="ev.cijenaUlaza" :info="ev.info" :adresaId="ev.idNoveLokacije" :adrese="Adrese" :galerijaId="ev.idGalerije" :galerije="Galerije" :idVrsteEventa="ev.idVrsteEventa" :eventovi="VrsteEventa"/>
+        <Event v-for="event in eventa" :key="event.idevent" :id="String(event.idevent)" :naziv="event.naziv" :cijena="event.cijena" :info="event.info" :novaLokacija="adrese.find(ad => ad.idlokacija === event.lokacijaid)?.mjesto" :galerija=null :vrstaEventa="vrste.find(v => v.idevent === event.vrstaid)?.tip"/>
     </div>
 
     <button id="createNew" @click="createNew()">Create New</button>
 
     <div v-if="showCreate" id="creation">
         Dodajte novi event: 
-        <input type="text" placeholder="Naziv eventa"/>
-        <input type="number" placeholder="Cijena ulaza"/>
-        <input type="number" placeholder="Cijena ulaza"/>
-        <select>
-            <option v-for="ad in adrese" :value="ad">{{ ad }}</option>
+        <input type="text" v-model="newEvent.naziv" placeholder="Naziv eventa"/>
+        <input type="number" v-model="newEvent.cijena" placeholder="Cijena ulaza"/>
+        <select v-model="newEvent.lokacijaid">
+            <option v-for="ad in adrese" :key="ad.idlokacija" :value="ad.idlokacija">{{ ad.mjesto }}</option>
         </select>
-        <select>
-            <option v-for="gal in galerije" :value="gal">{{ gal }}</option>
+        <select v-model="newEvent.galerijaid">
+            <option v-for="gal in galerije" :key="gal.idgalerija" :value="gal.idgalerija">{{ gal.naziv }}</option>
         </select>
-        <select>
-            <option v-for="vrsta in vrste" :value="vrsta">{{ vrsta }}</option>
+        <select v-model="newEvent.vrstaid">
+            <option v-for="vrsta in vrste" :value="vrsta.idevent" :key="vrsta.idevent">{{ vrsta.tip }}</option>
         </select>
-        <input type="text" placeholder="Dodatne informacije"/>
-        <button @click="confirmCreate">Create</button>
+        <input type="text" v-model="newEvent.info" placeholder="Dodatne informacije"/>
+        <button @click="createEvent()">Create</button>
     </div>
 </template>
 
