@@ -59,9 +59,11 @@ const ponisti = (id) => {
 <style scoped>
 #mainDiv {
     font-size: 30px;
-    color: grey;
+    color: rgb(213, 153, 236);
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 20px;
+    margin-bottom: 20px;
+    justify-content: space-between;
 }
 </style>

@@ -72,17 +72,17 @@ onMounted(() => {
         Dodajte novi event: 
         <input type="text" v-model="newEvent.naziv" placeholder="Naziv eventa"/>
         <input type="number" v-model="newEvent.cijena" placeholder="Cijena ulaza"/>
-        <select v-model="newEvent.lokacijaid">
+        <select id="opcijaAdrese" v-model="newEvent.lokacijaid">
             <option v-for="ad in Adrese" :value="ad.idlokacija" :key="ad.idlokacija">{{ ad.adresa }}</option>
         </select>
-        <select v-model="newEvent.galerijaid">
+        <select id="opcijaGalerije" v-model="newEvent.galerijaid">
             <option v-for="gal in Galerije" :value="gal.idgalerija" :key="gal.idgalerija">{{ gal.naziv }}</option>
         </select>
-        <select v-model="newEvent.vrstaid">
+        <select id="opcijaVrste" v-model="newEvent.vrstaid">
             <option v-for="vrs in VrsteEventa" :value="vrs.idvrsta_eventa" :key="vrs.idvrsta_eventa">{{ vrs.tip }}</option>
         </select>
         <input type="text" v-model="newEvent.info" placeholder="Dodatne informacije"/>
-        <button @click="createEvent()">Create</button>
+        <button id="createButton" @click="createEvent()">Create</button>
     </div>
 </template>
 
@@ -90,7 +90,18 @@ onMounted(() => {
 #podaci {
     display: flex;
     flex-direction: column;
+    width: 85%;
+    margin-left: 5%;
     gap: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    text-shadow: 2px 5px 2px rgba(92, 22, 113, 0.5);
+}
+#createNew {
+    width: 30%;
+    margin-left: 7%;
 }
 #creation {
     font-size: 25px;
@@ -98,8 +109,30 @@ onMounted(() => {
     flex-direction: column;
     gap: 10px; 
     font-weight: bold;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+    width: 85%;
+    margin-left: 5%;
 }
 input {
     font-size: 25px;
+    width: 70%;
+    align-self: center;
+    color: #551166
+}
+#createButton {
+    width: 30%;
+    align-self: center;
+}
+#opcijaAdrese, #opcijaGalerije, #opcijaVrste {
+    font-size: 25px;
+    width: 70%;
+    align-self: center;
+    color: white;
+}
+option {
+    color:#551166;
 }
 </style>

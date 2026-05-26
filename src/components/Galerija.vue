@@ -102,7 +102,7 @@ onMounted(() => {
             Cijena ulaza: <span ref="cijenaref" :class="'sranje' + id" :id = "id + 2">{{ cijena }}</span>
         </div>
         <div class="lapo">
-            Adresa: <select :id="id + 4" v-model="selectedAdress"><option v-for="ad in adrese" :value="ad.idlokacija" :key="ad.idlokacija">{{ ad.adresa }}</option> </select>
+            Adresa: <select :id="id + 4" v-model="selectedAdress"><option class="adresa-option" v-for="ad in adrese" :value="ad.idlokacija" :key="ad.idlokacija">{{ ad.adresa }}</option> </select>
             Info: <span ref="inforef" :class="'sranje' + id" :id="id + 3">{{ info }}</span>
             <button v-if="!editing" @click="edit(id)">Uredi</button>
             <button v-if="editing" @click="potvrdi()">Potvrdi</button>
@@ -121,7 +121,7 @@ onMounted(() => {
 <style scoped>
 #mainDiv {
     font-size: 30px;
-    color: grey;
+    color: rgb(213, 153, 236);
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
@@ -130,6 +130,14 @@ onMounted(() => {
 .lapo {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 15px;
+    margin-top: 20px;
+    margin-left: 3%;
+}
+select {
+    color: white;
+}
+.adresa-option {
+    color: #551166;
 }
 </style>

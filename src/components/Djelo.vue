@@ -148,7 +148,7 @@ onMounted(() => {
 <style scoped>
 #mainDiv {
     font-size: 30px;
-    color: grey;
+    color: rgb(213, 153, 236);
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
@@ -157,9 +157,17 @@ onMounted(() => {
 .lapo {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 15px;
+    margin-top: 20px;
+    margin-left: 3%;
+}
+select {
+    color: white;
+}
+option {
+    color: #551166; 
 }
 .authors:hover {
-    background-color: red;
+    background-color: rgb(85, 17, 102);
 }
 </style>

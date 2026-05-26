@@ -110,7 +110,8 @@ onMounted(() => {
             Galerija: <select v-model="selectedGalerija" :id="id + 6"><option v-for="g in galerije" :key="g.idgalerija" :value="g.idgalerija">{{ g.naziv }}</option> </select>
             Vrsta eventa: <select v-model="selectedVrsta" :id="id + 5"><option v-for="vr in eventovi" :key="vr.idvrsta_eventa" :value="vr.idvrsta_eventa">{{ vr.tip }}</option> </select>
             Nova lokacija: <select v-model="selectedAdress" :id="id + 4"><option v-for="ad in adrese" :key="ad.idlokacija" :value="ad.idlokacija">{{ ad.adresa }}</option> </select>
-
+        </div>
+        <div class="lapo">
             <button v-if="!editing" @click="edit(id)">Uredi</button> 
             <button v-if="editing" @click="potvrdi()">Potvrdi</button>
             <button v-if="editing" @click="ponisti(id)">Ponisti</button>
@@ -127,7 +128,7 @@ onMounted(() => {
 <style scoped>
 #mainDiv {
     font-size: 30px;
-    color: grey;
+    color: rgb(213, 153, 236);
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
@@ -136,6 +137,14 @@ onMounted(() => {
 .lapo {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 15px;
+    margin-top: 20px;
+    margin-left: 3%;
+}
+select {
+    color: white;
+}
+option {
+    color: #551166; 
 }
 </style>

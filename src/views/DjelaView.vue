@@ -79,14 +79,14 @@ onMounted(() => {
     <div v-if="showCreate" id="creation">
         Dodajte novo djelo: 
         <input type="text" v-model="newDjelo.naziv" placeholder="Naziv djela"/>
-        <select v-model="newDjelo.galerijaid">
+        <select id="opcijaGalerije" v-model="newDjelo.galerijaid">
             <option v-for="gal in Galerije" :value="gal.idgalerija" :key="gal.idgalerija">{{ gal.naziv }}</option>
         </select>
-        <select v-model="newDjelo.vrstaid">
+        <select id="opcijaVrste" v-model="newDjelo.vrstaid">
             <option v-for="vrsta in VrsteDjela" :value="vrsta.idvrsta_djela" :key="vrsta.idvrsta_djela">{{ vrsta.tip }}</option>
         </select>
         <input type="text" v-model="newDjelo.info" placeholder="Dodatne informacije"/>
-        <button @click="createDjelo()">Create</button>
+        <button id="createButton" @click="createDjelo()">Create</button>
     </div>
 </template>
 
@@ -95,6 +95,17 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 85%;
+    margin-left: 5%;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    text-shadow: 2px 5px 2px rgba(92, 22, 113, 0.5);
+}
+#createNew {
+    width: 30%;
+    margin-left: 7%;
 }
 #creation {
     font-size: 25px;
@@ -102,8 +113,30 @@ onMounted(() => {
     flex-direction: column;
     gap: 10px; 
     font-weight: bold;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+    width: 85%;
+    margin-left: 5%;
 }
 input {
     font-size: 25px;
+    width: 70%;
+    align-self: center;
+    color: #551166
+}
+#createButton {
+    width: 30%;
+    align-self: center;
+}
+#opcijaGalerije, #opcijaVrste {
+    font-size: 25px;
+    width: 70%;
+    align-self: center;
+    color: white;
+}
+option {
+    color:#551166;
 }
 </style>
