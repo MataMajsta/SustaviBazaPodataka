@@ -3,17 +3,21 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const selectedAdress = ref()
-
+const nazivref = ref()
+const cijenaref = ref()
+const inforef = ref()
+const selectedGalerija = ref()
+const selectedVrsta = ref()
 const props = defineProps({
-  id: String,
+  id: Number,
   naziv: String,
   cijena: Number,
   info: String,
-  adresaId: String,
+  adresaId: Number,
   adrese: Array,
-  galerijaId: String,
+  galerijaId: Number,
   galerije: Array,
-  idVrsteEventa: String,
+  idVrsteEventa: Number,
   eventovi: Array,
   variant: {
     type: String,
@@ -25,7 +29,7 @@ const editing = ref(false)
 
 const edit = (id) => {
     editing.value = true;
-    let divs = document.getElementsByClassName(id);
+    let divs = document.getElementsByClassName('sranje' + id);
     let i = 0;
     for(i = 0; i < divs.length; i++){
         divs[i].style.backgroundColor = "yellow";
@@ -37,7 +41,7 @@ const edit = (id) => {
 }
 const izbrisi = async () => {
     if(confirm("Jeste li sigurni da zelite izbrisati?")){
-        const response = await axios.delete('http://localhost:5000/api/events/' + props.id);
+        const response = await axios.delete('http://localhost:3000/eventi/' + props.id);
         console.log(response);
     }
 }
@@ -46,20 +50,23 @@ const potvrdi = async () => {
     if(confirm("Jeste li sigurni da ste dobro unijeli?")){
         let novaAdresa = "nesto";
         if(selectedAdress.value == 'Nova'){
-            const pom = await axios.post('http://localhost:5000/api/lokacije', {
+            const pom = await axios.post('http://localhost:3000/lokacije', {
                 mjesto: document.getElementById(props.id + 7).value,
                 drzava: document.getElementById(props.id + 8).value,
                 adresa: document.getElementById(props.id + 9).value,
             });
             novaAdresa = pom.data.id;
         } else novaAdresa = selectedAdress.value;
-        const response = await axios.patch('http://localhost:5000/api/events/' + props.id, {
-            "naziv": document.getElementById(props.id + 1).innerHTML,
-            "cijenaUlaza": document.getElementById(props.id + 2).innerHTML,
-            "info": document.getElementById(props.id + 3).innerHTML,
-            "idNoveLokacije": novaAdresa,
-            "idGalerije": document.getElementById(props.id + 6).value,
-            "idVrsteEventa": document.getElementById(props.id + 5).value,
+        console.log('Creating event with data:', {
+            naziv: nazivref.value.innerHTML,
+        });
+        const response = await axios.patch('http://localhost:3000/eventi/' + props.id, {
+            "naziv": nazivref.value.innerHTML,
+            "nova_lokacija": novaAdresa,
+            "cijena_ulaza": Number(cijenaref.value.innerHTML),
+            "info": inforef.value.innerHTML,
+            "galerija": selectedGalerija.value,
+            "vrsta": selectedVrsta.value,
         });
         console.log(response);
     }
@@ -68,7 +75,7 @@ const potvrdi = async () => {
 const ponisti = (id) => {
     // Ovdje bi jos trebalo i vratiti stare vrijednosti u polja
     editing.value = false;
-    let divs = document.getElementsByClassName(id);
+    let divs = document.getElementsByClassName('sranje' + id);
     let i = 0;
     for(i = 0; i < divs.length; i++){
         divs[i].style.backgroundColor = "transparent";
@@ -83,10 +90,10 @@ onMounted(() => {
     selectedAdress.value = props.adresaId;
     document.getElementById(props.id + 4).style.pointerEvents = "none";
     
-    document.getElementById(props.id + 5).value = props.idVrsteEventa;
+    selectedVrsta.value = props.idVrsteEventa;
     document.getElementById(props.id + 5).style.pointerEvents = "none";
     
-    document.getElementById(props.id + 6).value = props.galerijaId;
+    selectedGalerija.value = props.galerijaId;
     document.getElementById(props.id + 6).style.pointerEvents = "none";
 })
 </script>
@@ -95,16 +102,16 @@ onMounted(() => {
     <div id="mainDiv">
         <div class="lapo">
             ID: <span>{{ id }}</span>
-            Naziv: <span :class="id" :id="id + 1">{{ naziv }}</span>
-            Cijena: <span :class="id" :id = "id + 2">{{ cijena }}</span>
-            Info: <span :id="id + 3" :class="id">{{ info }}</span>
+            Naziv: <span ref="nazivref" :class="'sranje' + id" :id="id + 1">{{ naziv }}</span>
+            Cijena: <span ref="cijenaref" :class="'sranje' + id" :id = "id + 2">{{ cijena }}</span>
+            Info: <span ref="inforef" :id="id + 3" :class="'sranje' + id">{{ info }}</span>
         </div>
         <div class="lapo">
-            Galerija: <select :id="id + 6"><option v-for="g in galerije" :value="g._id">{{ g.naziv }}</option> </select>
-            Vrsta eventa: <select :id="id + 5"><option v-for="vr in eventovi" :value="vr._id">{{ vr.tip }}</option> </select>
-            Nova lokacija: <select v-model="selectedAdress" :id="id + 4"><option v-for="ad in adrese" :value="ad._id">{{ ad.adresa }}</option> </select>
+            Galerija: <select v-model="selectedGalerija" :id="id + 6"><option v-for="g in galerije" :key="g.idgalerija" :value="g.idgalerija">{{ g.naziv }}</option> </select>
+            Vrsta eventa: <select v-model="selectedVrsta" :id="id + 5"><option v-for="vr in eventovi" :key="vr.idvrsta_eventa" :value="vr.idvrsta_eventa">{{ vr.tip }}</option> </select>
+            Nova lokacija: <select v-model="selectedAdress" :id="id + 4"><option v-for="ad in adrese" :key="ad.idlokacija" :value="ad.idlokacija">{{ ad.adresa }}</option> </select>
 
-            <button v-if="!editing" @click="edit(id)">Uredi</button>
+            <button v-if="!editing" @click="edit(id)">Uredi</button> 
             <button v-if="editing" @click="potvrdi()">Potvrdi</button>
             <button v-if="editing" @click="ponisti(id)">Ponisti</button>
             <button @click="izbrisi()">Izbrisi</button>

@@ -7,7 +7,14 @@ const Adrese = ref([]);
 const Galerije = ref([]);
 const VrsteEventa = ref([]);
 const Events = ref([]);
-
+const newEvent = ref({
+    naziv: '',
+    cijena: 0,
+    info: '',
+    lokacijaid: null,
+    galerijaid: null,
+    vrstaid: null,
+});
 const showCreate = ref(false);
 
 const createNew = () => {
@@ -17,19 +24,34 @@ const createNew = () => {
 const confirmCreate = () => {
     alert('Kreirano');
 }
-
+async function createEvent() {   
+    console.log('Creating event with data:', newEvent.value);
+        try {
+            const response = await axios.post('http://localhost:3000/eventi', {
+                naziv: newEvent.value.naziv,
+                nova_lokacija: newEvent.value.lokacijaid,
+                cijena_ulaza: newEvent.value.cijena,
+                info: newEvent.value.info,
+                galerija: newEvent.value.galerijaid,
+                vrsta: newEvent.value.vrstaid,
+            });
+            console.log('Event created successfully:', response.data);
+        } catch (error) {
+            console.error('Error creating event:', error);
+        }
+    }
 const postavljanje = async () => {
-    let adrese = await axios.get('http://localhost:5000/api/lokacije');
+    let adrese = await axios.get('http://localhost:3000/lokacije');
     Adrese.value = adrese.data;
-    Adrese.value[Adrese.value.length] = {_id: "Nova", adresa: "Nova"};
+    Adrese.value[Adrese.value.length] = {idlokacija: "Nova", adresa: "Nova"};
 
-    let galerije = await axios.get('http://localhost:5000/api/galerije');
+    let galerije = await axios.get('http://localhost:3000/galerije');
     Galerije.value = galerije.data;
 
-    let vrsteEventa = await axios.get('http://localhost:5000/api/vrsteEventa');
+    let vrsteEventa = await axios.get('http://localhost:3000/vrste/eventi');
     VrsteEventa.value = vrsteEventa.data;
 
-    let events = await axios.get('http://localhost:5000/api/events');
+    let events = await axios.get('http://localhost:3000/eventi');
     Events.value = events.data;
 }
 
@@ -41,27 +63,26 @@ onMounted(() => {
 <template>
     <div id="podaci">
         <div>Podaci iz baze</div>
-        <Event v-for="ev in Events" :id="ev._id" :naziv="ev.naziv" :cijena="ev.cijenaUlaza" :info="ev.info" :adresaId="ev.idNoveLokacije" :adrese="Adrese" :galerijaId="ev.idGalerije" :galerije="Galerije" :idVrsteEventa="ev.idVrsteEventa" :eventovi="VrsteEventa"/>
+        <Event v-for="ev in Events" :id="ev.idevent" :naziv="ev.naziv" :cijena="ev.cijena_ulaza" :info="ev.info" :adresaId="ev.nova_lokacija" :adrese="Adrese" :galerijaId="ev.galerija" :galerije="Galerije" :idVrsteEventa="ev.vrsta" :eventovi="VrsteEventa"/>
     </div>
 
     <button id="createNew" @click="createNew()">Create New</button>
 
     <div v-if="showCreate" id="creation">
         Dodajte novi event: 
-        <input type="text" placeholder="Naziv eventa"/>
-        <input type="number" placeholder="Cijena ulaza"/>
-        <input type="number" placeholder="Cijena ulaza"/>
-        <select>
-            <option v-for="ad in adrese" :value="ad">{{ ad }}</option>
+        <input type="text" v-model="newEvent.naziv" placeholder="Naziv eventa"/>
+        <input type="number" v-model="newEvent.cijena" placeholder="Cijena ulaza"/>
+        <select v-model="newEvent.lokacijaid">
+            <option v-for="ad in Adrese" :value="ad.idlokacija" :key="ad.idlokacija">{{ ad.adresa }}</option>
         </select>
-        <select>
-            <option v-for="gal in galerije" :value="gal">{{ gal }}</option>
+        <select v-model="newEvent.galerijaid">
+            <option v-for="gal in Galerije" :value="gal.idgalerija" :key="gal.idgalerija">{{ gal.naziv }}</option>
         </select>
-        <select>
-            <option v-for="vrsta in vrste" :value="vrsta">{{ vrsta }}</option>
+        <select v-model="newEvent.vrstaid">
+            <option v-for="vrs in VrsteEventa" :value="vrs.idvrsta_eventa" :key="vrs.idvrsta_eventa">{{ vrs.tip }}</option>
         </select>
-        <input type="text" placeholder="Dodatne informacije"/>
-        <button @click="confirmCreate">Create</button>
+        <input type="text" v-model="newEvent.info" placeholder="Dodatne informacije"/>
+        <button @click="createEvent()">Create</button>
     </div>
 </template>
 

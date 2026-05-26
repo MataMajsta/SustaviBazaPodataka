@@ -5,6 +5,12 @@ import axios from 'axios';
 
 const Adrese = ref([]);
 const Galerije = ref([]);
+const newGalerija = ref({
+    naziv: '',
+    cijena_ulaza: 0,
+    info: '',
+    lokacijaid: 0
+});
 
 const showCreate = ref(false);
 
@@ -15,12 +21,25 @@ const createNew = () => {
 const confirmCreate = () => {
     alert('Kreirano');
 }
-
+async function createGalerija() {   
+        try {
+            const response = await axios.post('http://localhost:3000/galerije', {
+                naziv: newGalerija.value.naziv,
+                cijena_ulaza: newGalerija.value.cijena_ulaza,
+                info: newGalerija.value.info,
+                idlokacije: newGalerija.value.lokacijaid
+            });
+            console.log(newGalerija.value);
+            console.log('Galerija created successfully:', response.data);
+        } catch (error) {
+            console.error('Error creating galerija:', error);
+        }
+    }
 const testBack = async () => {
-    let adrese = await axios.get('http://localhost:5000/api/lokacije');
+    let adrese = await axios.get('http://localhost:3000/lokacije');
     Adrese.value = adrese.data;
-    Adrese.value[Adrese.value.length] = {_id: "Nova", adresa: "Nova"};
-    let galerije = await axios.get('http://localhost:5000/api/galerije');
+    Adrese.value[Adrese.value.length] = {idlokacija: "Nova", adresa: "Nova"};
+    let galerije = await axios.get('http://localhost:3000/galerije');
     Galerije.value = galerije.data;
 }
 
@@ -32,20 +51,20 @@ onMounted(() => {
 <template>
     <div id="podaci">
         <div>Podaci iz baze</div>
-        <Galerija v-for="g in Galerije" :id="g._id" :naziv="g.naziv" :cijena="g.cijenaUlaza" :info="g.info" :adresaId="g.idLokacije" :adrese="Adrese"/>
+        <Galerija v-for="g in Galerije" :id="g.idgalerija" :naziv="g.naziv" :cijena="g.cijena_ulaza" :info="g.info" :adresaId="g.idlokacije" :adrese="Adrese"/>
     </div>
 
     <button id="createNew" @click="createNew()">Create New</button>
 
     <div v-if="showCreate" id="creation">
         Dodajte novu galeriju: 
-        <input type="text" placeholder="Naziv galerije"/>
-        <input type="number" placeholder="Cijena ulaza"/>
-        <select>
-            <option v-for="ad in Adrese" :value="ad.adresa">{{ ad.adresa }}</option>
+        <input type="text" v-model="newGalerija.naziv" placeholder="Naziv galerije"/>
+        <input type="number" v-model="newGalerija.cijena_ulaza" placeholder="Cijena ulaza"/>
+        <select v-model="newGalerija.lokacijaid">
+            <option v-for="ad in Adrese" :value="ad.idlokacija" :key="ad.idlokacija">{{ ad.adresa }}</option>
         </select>
-        <input type="text" placeholder="Dodatne informacije"/>
-        <button @click="confirmCreate">Create</button>
+        <input type="text" v-model="newGalerija.info" placeholder="Dodatne informacije"/>
+        <button @click="createGalerija()">Create</button>
     </div>
 </template>
 

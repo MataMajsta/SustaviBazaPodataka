@@ -1,15 +1,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-
 const selectedAdress = ref()
-
+ 
+const nazivref = ref();
+const cijenaref = ref();    
+const inforef = ref();
 const props = defineProps({
-  id: String,
+  id: Number,
   naziv: String,
   cijena: Number,
   info: String,
-  adresaId: String,
+  adresaId: Number,
   adrese: Array,
   variant: {
     type: String,
@@ -21,61 +23,69 @@ const editing = ref(false)
 
 const edit = (id) => {
     editing.value = true;
-    let divs = document.getElementsByClassName(id);
+    console.log("editujemo " + id);
+    console.log(document.getElementsByClassName('sranje' + id));
+    let divs = document.getElementsByClassName('sranje' + id);
     let i = 0;
     for(i = 0; i < divs.length; i++){
-        divs[i].style.backgroundColor = "yellow";
+        divs[i].style.backgroundColor = "green";
         divs[i].contentEditable = true;
     }
     document.getElementById(props.id + 4).style.pointerEvents = "auto";
 }
 const izbrisi = async () => {
     if(confirm("Jeste li sigurni da zelite izbrisati?")){
-        const response = await axios.delete('http://localhost:5000/api/galerije/' + props.id);
+        const response = await axios.delete('http://localhost:3000/galerije/' + props.id);
+      
         console.log(response);
     }
 }
 
 const potvrdi = async () => {
+    console.log("potvrđujemo " + props.id);
+    const nazivNovi=nazivref.value.innerHTML;
+    const cijenaNovi=cijenaref.value.innerHTML;
+    const infoNovi=inforef.value.innerHTML;
     if(confirm("Jeste li sigurni da ste dobro unijeli?")){
         let novaAdresa = "nesto";
         if(selectedAdress.value == 'Nova'){
-            const pom = await axios.post('http://localhost:5000/api/lokacije', {
+            const pom = await axios.post('http://localhost:3000/lokacije', {
                 mjesto: document.getElementById(props.id + 6).value,
                 drzava: document.getElementById(props.id + 7).value,
                 adresa: document.getElementById(props.id + 8).value,
             });
-            novaAdresa = pom.data.id;
+            novaAdresa = pom.data.idlokacija;
         } else novaAdresa = selectedAdress.value;
-        const response = await axios.patch('http://localhost:5000/api/galerije/' + props.id, {
-            "naziv": document.getElementById(props.id + 1).innerHTML,
-            "cijenaUlaza": document.getElementById(props.id + 2).innerHTML,
-            "info": document.getElementById(props.id + 3).innerHTML,
-            "idLokacije": novaAdresa
+        const response = await axios.patch('http://localhost:3000/galerije/' + props.id, {
+            "naziv": nazivNovi,
+            "cijena_ulaza": cijenaNovi,
+            "info": infoNovi,
+            "idlokacije": novaAdresa
         });
         console.log(response);
+        
     }
 }
 
 const ponisti = (id) => {
     // Ovdje bi jos trebalo i vratiti stare vrijednosti u polja
     editing.value = false;
-    let divs = document.getElementsByClassName(id);
+    let divs = document.getElementsByClassName(String(id));
     let i = 0;
     for(i = 0; i < divs.length; i++){
         divs[i].style.backgroundColor = "transparent";
-        divs[i].contentEditable = true;
+        divs[i].contentEditable = false;
     }
     document.getElementById(props.id + 4).style.pointerEvents = "none";
 }
 
 const check = async () => {
-    const pom = await axios.post('http://localhost:5000/api/lokacije', {
+    const pom = await axios.post('http://localhost:3000/lokacije', {
                 mjesto: document.getElementById(props.id + 6).value,
                 drzava: document.getElementById(props.id + 7).value,
                 adresa: document.getElementById(props.id + 8).value,
             });
-            console.log(pom.data.id);
+            console.log(document.getElementById(props.id + 6).value);
 }
 
 onMounted(() => {
@@ -88,12 +98,12 @@ onMounted(() => {
     <div id="mainDiv">
         <div class="lapo">
             ID: <span>{{ id }}</span>
-            Naziv: <span :class="id" :id="id + 1">{{ naziv }}</span>
-            Cijena ulaza: <span :class="id" :id = "id + 2">{{ cijena }}</span>
+            Naziv: <span ref="nazivref" :class="'sranje' + id" :id="id + 1">{{ naziv }}</span>
+            Cijena ulaza: <span ref="cijenaref" :class="'sranje' + id" :id = "id + 2">{{ cijena }}</span>
         </div>
         <div class="lapo">
-            Adresa: <select :id="id + 4" v-model="selectedAdress"><option v-for="ad in adrese" :value="ad._id">{{ ad.adresa }}</option> </select>
-            Info: <span :class="id" :id="id + 3">{{ info }}</span>
+            Adresa: <select :id="id + 4" v-model="selectedAdress"><option v-for="ad in adrese" :value="ad.idlokacija" :key="ad.idlokacija">{{ ad.adresa }}</option> </select>
+            Info: <span ref="inforef" :class="'sranje' + id" :id="id + 3">{{ info }}</span>
             <button v-if="!editing" @click="edit(id)">Uredi</button>
             <button v-if="editing" @click="potvrdi()">Potvrdi</button>
             <button v-if="editing" @click="ponisti(id)">Ponisti</button>
